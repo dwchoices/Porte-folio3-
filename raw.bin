@@ -1,0 +1,136 @@
+{
+  "name": "API WhatsApp & Instagram Screenshot Extractor",
+  "description": "Spécification d'API pour extraire informations textuelles et métadonnées depuis captures d'écran WhatsApp & Instagram.",
+  "base_url": "https://api.example.com/v1",
+  "endpoints": [
+    {
+      "path": "/extract",
+      "method": "POST",
+      "description": "Envoie une image (screenshot) et obtient les informations extraites (contacts, messages, dates, localisation éventuelle).",
+      "headers": {
+        "Authorization": "Bearer <token>",
+        "Content-Type": "multipart/form-data"
+      },
+      "request": {
+        "multipart": {
+          "image": {
+            "type": "file",
+            "required": true,
+            "description": "Fichier image (png/jpg/webp)"
+          },
+          "source": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "whatsapp",
+              "instagram",
+              "unknown"
+            ],
+            "description": "Source présumée"
+          }
+        }
+      },
+      "response": {
+        "200": {
+          "description": "Extraction réussie",
+          "body": {
+            "image_id": "string",
+            "source": "string",
+            "extracted_text": "string",
+            "entities": [
+              {
+                "type": "string",
+                "value": "string",
+                "confidence": 0.0,
+                "span": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "contacts": [
+              {
+                "name": "string",
+                "phone": "string",
+                "platform": "string"
+              }
+            ],
+            "timestamps": [
+              {
+                "iso": "string",
+                "original_format": "string",
+                "timezone": "string"
+              }
+            ],
+            "language": {
+              "code": "string",
+              "confidence": 0.0
+            },
+            "metadata": {
+              "width": 0,
+              "height": 0,
+              "format": "string"
+            },
+            "warnings": [
+              "string"
+            ]
+          }
+        },
+        "400": {
+          "description": "Bad Request — image manquante ou invalide"
+        },
+        "401": {
+          "description": "Unauthorized — token invalide"
+        },
+        "415": {
+          "description": "Unsupported Media Type"
+        }
+      },
+      "errors": {
+        "INVALID_IMAGE": {
+          "code": 4001,
+          "message": "Le fichier image est invalide ou corrompu."
+        },
+        "NO_TEXT_FOUND": {
+          "code": 4002,
+          "message": "Aucun texte détecté dans l'image."
+        }
+      }
+    },
+    {
+      "path": "/batch-extract",
+      "method": "POST",
+      "description": "Traitement en lot (plusieurs images).",
+      "request": {
+        "body": {
+          "images": [
+            {
+              "image_id": "string",
+              "image_base64": "string"
+            }
+          ],
+          "callback_url": "string (optionnel)"
+        }
+      },
+      "response": {
+        "202": {
+          "description": "Accepted — traitement asynchrone déclenché",
+          "body": {
+            "job_id": "string"
+          }
+        }
+      }
+    }
+  ],
+  "ratelimit": {
+    "per_minute": 60,
+    "per_day": 10000
+  },
+  "security": {
+    "type": "bearerAuth",
+    "notes": "Utiliser JWT ou token API"
+  },
+  "examples": {
+    "curl": "curl -X POST -H 'Authorization: Bearer TOKEN' -F 'image=@screenshot.png' https://api.example.com/v1/extract"
+  }
+}
